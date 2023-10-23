@@ -15,7 +15,7 @@ def plot_manifest_results(csv_manifest_path, filter_column_name=None):
     accuracies = {weight: {} for weight in weights}
     for predicate in predicates:
         for weight in weights:
-            if filter_column_name == None:
+            if filter_column_name is None:
                 filtered_df = manifest_df[(manifest_df.weight == weight) & (manifest_df.predicate == predicate)]
             else:
                 filtered_df = manifest_df[(manifest_df.weight == weight) & (manifest_df.predicate == predicate) & (manifest_df[filter_column_name] == 1)]

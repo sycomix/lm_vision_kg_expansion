@@ -68,8 +68,7 @@ def generate_find_object_question_from_triple(subj, pred, obj):
         stop=["\n"]
     )
 
-    text_answer = response['choices'][0]['text'].strip()
-    return text_answer
+    return response['choices'][0]['text'].strip()
 
 def generate_find_subject_question_from_triple(subj, pred, obj):
     start_sequence = "\nA:"
@@ -86,8 +85,7 @@ def generate_find_subject_question_from_triple(subj, pred, obj):
         stop=["\n"]
     )
 
-    text_answer = response['choices'][0]['text'].strip()
-    return text_answer
+    return response['choices'][0]['text'].strip()
 
 def generate_sentence_from_triple_using_gpt3(subj, pred, obj, temperature):
     start_sequence = "\nA:"
@@ -104,8 +102,7 @@ def generate_sentence_from_triple_using_gpt3(subj, pred, obj, temperature):
         stop=["\n"]
     )
 
-    text_answer = response['choices'][0]['text'].strip()
-    return text_answer
+    return response['choices'][0]['text'].strip()
 
 def evaluate_sentence_by_gpt3(prompt, sentence, temperature=TEMPERATURE, max_tokens=MAX_TOKENS, top_p=TOP_P, frequency_penalty=FREQUENCY_PENALTY, presence_penalty=PRESENCE_PENALTY, engine=ENGINE):
     start_sequence = "\nA:"

@@ -21,13 +21,26 @@ def generate_questions(out_path, selected_wpkg_triples, selected_entities_to_exp
         for subj in selected_entities_to_expand:
             for pred in top_preds:
                 for weight in weights:
-                    row_dict = {'weight': weight,
-                                'subject': subj,
-                                'predicate': pred,
-                                'object': 'x',
-                                'find_subj_question': '', 'find_subj_text_answer': '', 'find_subj_answers': [], 'find_subj_reason': '', 'find_subj_engine': '', 'find_subj_temperature': '',
-                                'find_obj_question': eval('f' + repr(FUZZY_QUESTION_TEMPLATES[pred][weight][1])), 'find_obj_text_answer': '', 'find_obj_answers': [], 'find_obj_reason': '', 'find_obj_engine': '', 'find_obj_temperature': '',
-                                }
+                    row_dict = {
+                        'weight': weight,
+                        'subject': subj,
+                        'predicate': pred,
+                        'object': 'x',
+                        'find_subj_question': '',
+                        'find_subj_text_answer': '',
+                        'find_subj_answers': [],
+                        'find_subj_reason': '',
+                        'find_subj_engine': '',
+                        'find_subj_temperature': '',
+                        'find_obj_question': eval(
+                            f'f{repr(FUZZY_QUESTION_TEMPLATES[pred][weight][1])}'
+                        ),
+                        'find_obj_text_answer': '',
+                        'find_obj_answers': [],
+                        'find_obj_reason': '',
+                        'find_obj_engine': '',
+                        'find_obj_temperature': '',
+                    }
                     csv_df = csv_df.append(row_dict, ignore_index=True)
         csv_df.to_csv(out_file_path, index=False)
         print(f'*** Questions saved at: {out_file_path}')
@@ -38,33 +51,57 @@ def generate_questions(out_path, selected_wpkg_triples, selected_entities_to_exp
         for triple_string in triple_strings:
             subj, pred, obj = triple_string.split(':')
             if not is_fuzzy:
-                row_dict = {'subject': subj,
-                            'predicate': pred,
-                            'object': obj,
-                            'find_subj_question': eval('f' + repr(QUESTION_TEMPLATES[pred][0])),
-                            'find_subj_text_answer': '', 'find_subj_answers': [], 'find_subj_engine': '', 'find_subj_temperature': '',
-                            'find_obj_question': eval('f' + repr(QUESTION_TEMPLATES[pred][1])), 
-                            'find_obj_text_answer': '', 'find_obj_answers': [], 'find_subj_engine': '', 'find_subj_temperature': ''
-                            }
+                row_dict = {
+                    'subject': subj,
+                    'predicate': pred,
+                    'object': obj,
+                    'find_subj_question': eval(
+                        f'f{repr(QUESTION_TEMPLATES[pred][0])}'
+                    ),
+                    'find_subj_text_answer': '',
+                    'find_subj_answers': [],
+                    'find_subj_engine': '',
+                    'find_subj_temperature': '',
+                    'find_obj_question': eval(
+                        f'f{repr(QUESTION_TEMPLATES[pred][1])}'
+                    ),
+                    'find_obj_text_answer': '',
+                    'find_obj_answers': [],
+                    'find_subj_engine': '',
+                    'find_subj_temperature': '',
+                }
                 csv_df = csv_df.append(row_dict, ignore_index=True)
             else:
                 for weight in weights:
-                    row_dict = {'weight': weight,
-                                'subject': subj,
-                                'predicate': pred,
-                                'object': obj,
-                                'find_subj_question': eval('f' + repr(FUZZY_QUESTION_TEMPLATES[pred][weight][0])),
-                                'find_subj_text_answer': '', 'find_subj_answers': [], 'find_subj_reason': '', 'find_subj_engine': '', 'find_subj_temperature': '',
-                                'find_obj_question': eval('f' + repr(FUZZY_QUESTION_TEMPLATES[pred][weight][1])), 
-                                'find_obj_text_answer': '', 'find_obj_answers': [], 'find_obj_reason': '', 'find_obj_engine': '', 'find_obj_temperature': ''
-                                }
+                    row_dict = {
+                        'weight': weight,
+                        'subject': subj,
+                        'predicate': pred,
+                        'object': obj,
+                        'find_subj_question': eval(
+                            f'f{repr(FUZZY_QUESTION_TEMPLATES[pred][weight][0])}'
+                        ),
+                        'find_subj_text_answer': '',
+                        'find_subj_answers': [],
+                        'find_subj_reason': '',
+                        'find_subj_engine': '',
+                        'find_subj_temperature': '',
+                        'find_obj_question': eval(
+                            f'f{repr(FUZZY_QUESTION_TEMPLATES[pred][weight][1])}'
+                        ),
+                        'find_obj_text_answer': '',
+                        'find_obj_answers': [],
+                        'find_obj_reason': '',
+                        'find_obj_engine': '',
+                        'find_obj_temperature': '',
+                    }
                     csv_df = csv_df.append(row_dict, ignore_index=True)
             csv_df.to_csv(out_file_path, index=False)
     print(f'*** Questions saved at: {out_file_path}')
     return out_file_path
 
 def get_wpkg_prompt(predicate):
-    with open(f'./results/gpt_3_wpkg/all_prompts.json') as json_file:
+    with open('./results/gpt_3_wpkg/all_prompts.json') as json_file:
         all_prompts = json.load(json_file)
     return all_prompts[predicate]
 
@@ -123,8 +160,10 @@ if __name__ == "__main__":
     with open(context_free_wpkg_path, 'r') as fp:
         wpkg = json.load(fp)
     # Sorting the WpKG based on weight
-    sorted_wpkg = {k: v for k, v in sorted(wpkg.items(), key=lambda item: item[1], reverse=True)}
-    
+    sorted_wpkg = dict(
+        sorted(wpkg.items(), key=lambda item: item[1], reverse=True)
+    )
+
     """ Preparing Prompts """
     # Finding most common predicates
     # Excluding some predicates, such as 'in front of' and 'above'
@@ -166,7 +205,7 @@ if __name__ == "__main__":
     with open(f'{work_path}/{all_prompts_name}', 'w') as f:
         json.dump(all_prompts, f)
     # print(f'*** all prompts: \n\n {all_prompts}')
-    
+
     """ Choosing Predicates to Expand """
     # Selecting the triples to expand
     if is_predicate_expansion:
@@ -178,10 +217,10 @@ if __name__ == "__main__":
         selected_entities_to_expand = []
     # Generating questions for the selected triples
     questions_file_path = generate_questions(work_path, selected_triples_to_expand, selected_entities_to_expand, top_preds, no_of_results, is_fuzzy=is_fuzzy, is_predicate_expansion=is_predicate_expansion)
-    
+
     """ In case we have a previous run, we like to remove the questions already aske before to save resources. """
     questions_file_path = remove_duplicate_questions(questions_file_path, previous_question_file_paths)
-    
+
     """ Getting and Recording GPT-3 Answers """
     # Getting GPT-3 Answers
     gpt3_answers_file_path = f'{work_path}/{Path(questions_file_path).stem}_with_answers_using_{engines[0]}_model'.replace('-', '_')

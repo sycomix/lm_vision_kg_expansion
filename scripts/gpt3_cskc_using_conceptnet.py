@@ -100,8 +100,7 @@ def generate_prompt(num_of_concepts_returned):
     if num_of_concepts_returned > len(sample_response_words):
         raise Exception(f'Number of requested concepts are larger than the available samples in prompt: {num_of_concepts_returned} > {len(sample_response_words)}')
     sliced_string_response_words = ', '.join(sample_response_words[:num_of_concepts_returned])
-    prompt = f'Q: What can you see besides a plate? Name {number_to_string[num_of_concepts_returned]}.\nA: {sliced_string_response_words}.'
-    return prompt
+    return f'Q: What can you see besides a plate? Name {number_to_string[num_of_concepts_returned]}.\nA: {sliced_string_response_words}.'
 
 def generate_better_prompt(predicate):
     find_subj_prompt, find_obj_prompt = None, None
@@ -109,33 +108,30 @@ def generate_better_prompt(predicate):
     # As in this example: https://beta.openai.com/playground/p/w09hHjYD0575R0UwSSudZ4MW
     prompt = 'Q: What can you see besides a plate? Name ten.\nA: knife, fork, spoon, glass, napkin, plate, glass, salt, pepper, ketchup.\n\nQ: What is a cat? Name ten.\nA: mammal, animal, domesticated, carnivore, feline, friend, chordata, furry, active, funny.\n\nQ: What is at earth? Name ten.\nA: continents, countries, mountains, oceans, seas, rivers, people, animals, streets, buildings.'
     # Specific prompts
-    if predicate == 'IsA':
-        # https://beta.openai.com/playground/p/E32kUf0DohQw0tUzLCXrexrT
-        find_obj_prompt = 'Q: What is a cat? Name ten.\nA: mammal, animal, domesticated, carnivore, feline, friend, chordata, furry, active, funny.'
-    elif predicate == 'AtLocation':
+    if predicate == 'AtLocation':
         # https://beta.openai.com/playground/p/1dQNNm7r7ikWTthkmEggwFZY
         find_subj_prompt = 'Answer with ten concepts separated with comma.\n\nQ: What is at park? Name ten.\nA: bench, trees, squirrel, flowers, people, children, grass, soil, playground, walking paths.'
         find_obj_prompt = 'Answer with ten concepts separated with comma.\n\nQ: Where is a table? Name ten.\nA: restaurant, bar, classroom, park, coffeeshop, office, home, kitchen, lobby, hotel room.'
-    elif predicate == 'HasProperty':
-        find_obj_prompt = 'Answer with ten concepts separated with comma.\n\nQ: What properties does water have? Name ten.\nA: liquid, clear, polar, has neutral pH, excellent solvent, has high heat capacity, has high heat of vaporization, has cohesive and adhesive properties, less dense as solid, has melting point of zero degrees celsius.'
     elif predicate == 'CapableOf':
         find_subj_prompt = 'Answer with ten concepts separated with comma.\n\nQ: What is capable of running? Name ten.\nA: man, woman, child, boy, girl, cat, dog, cheetah, lion, kangaroo.'
         find_obj_prompt = 'Answer with ten concepts separated with comma.\n\nQ: What is cat capable of? Name ten.\nA: walking, running, jumping, eating, purring, pooping, peeing, seeing, meowing, scratching.'
-    elif predicate == 'HasSubevent':
-        find_obj_prompt = 'Answer with ten concepts separated with comma.\n\nQ: What is the subevent of exercise? Name ten.\nA: maintaining good health, maintaining muscle strength, getting fit, staying fit, getting in shape, losing weight, maintaining muscle strength, staying fit, staying healthy, dancing.\n\nQ: What is a cat? Name ten.\nA: mammal, animal, domesticated, carnivore, feline, friend, chordata, furry, active, funny.'
-    elif predicate == 'UsedFor':
-        find_subj_prompt = 'Answer with ten concepts separated with comma.\n\nQ: What do u need to cook? Name ten.\nA: pan, stove, oven, knife, cutting board, mixing bowl, skillet, barbecue, saucepan, seasonings.'
-        find_obj_prompt = 'Answer with ten concepts separated with comma.\n\nQ: What is knife used for? Name ten.\nA: cutting, chopping, dicing, slicing, mincing, peeling, separating, killing, fighting, incision.'
+    elif predicate in ['Causes', 'CausesDesire']:
+        find_subj_prompt = 'Answer with ten concepts separated with comma.\n\nQ: What causes an injury? Name ten.\nA: falling, accident, poisoning, fall, slipping, improper use of tools, drowning, suffocation, electrical discharge, burn.'
     elif predicate == 'HasPrerequisite':
         find_subj_prompt = 'Answer with ten concepts separated with comma.\n\nQ: What happens after studying hard? Name ten.\nA: getting high grades, becoming top student, graduating, passing exam, entering university, having headache, getting a good job, becoming a physician, becoming an engineer, reaching your goals.'
         find_obj_prompt = 'Answer with ten concepts separated with comma.\n\nQ: What is the prerequisite for entering university? Name ten.\nA: studying, growing older, sitting exams, exam preparation, working hard, sacrificing, studying mathematics, studying physics, learning reading and writing, having high grades.'
-    elif predicate == 'Causes':
-        find_subj_prompt = 'Answer with ten concepts separated with comma.\n\nQ: What causes an injury? Name ten.\nA: falling, accident, poisoning, fall, slipping, improper use of tools, drowning, suffocation, electrical discharge, burn.'
-    elif predicate == 'CausesDesire':
-        find_subj_prompt = 'Answer with ten concepts separated with comma.\n\nQ: What causes an injury? Name ten.\nA: falling, accident, poisoning, fall, slipping, improper use of tools, drowning, suffocation, electrical discharge, burn.'
-    
-    find_subj_prompt = prompt if find_subj_prompt == None else find_subj_prompt
-    find_obj_prompt = prompt if find_obj_prompt == None else find_obj_prompt
+    elif predicate == 'HasProperty':
+        find_obj_prompt = 'Answer with ten concepts separated with comma.\n\nQ: What properties does water have? Name ten.\nA: liquid, clear, polar, has neutral pH, excellent solvent, has high heat capacity, has high heat of vaporization, has cohesive and adhesive properties, less dense as solid, has melting point of zero degrees celsius.'
+    elif predicate == 'HasSubevent':
+        find_obj_prompt = 'Answer with ten concepts separated with comma.\n\nQ: What is the subevent of exercise? Name ten.\nA: maintaining good health, maintaining muscle strength, getting fit, staying fit, getting in shape, losing weight, maintaining muscle strength, staying fit, staying healthy, dancing.\n\nQ: What is a cat? Name ten.\nA: mammal, animal, domesticated, carnivore, feline, friend, chordata, furry, active, funny.'
+    elif predicate == 'IsA':
+        # https://beta.openai.com/playground/p/E32kUf0DohQw0tUzLCXrexrT
+        find_obj_prompt = 'Q: What is a cat? Name ten.\nA: mammal, animal, domesticated, carnivore, feline, friend, chordata, furry, active, funny.'
+    elif predicate == 'UsedFor':
+        find_subj_prompt = 'Answer with ten concepts separated with comma.\n\nQ: What do u need to cook? Name ten.\nA: pan, stove, oven, knife, cutting board, mixing bowl, skillet, barbecue, saucepan, seasonings.'
+        find_obj_prompt = 'Answer with ten concepts separated with comma.\n\nQ: What is knife used for? Name ten.\nA: cutting, chopping, dicing, slicing, mincing, peeling, separating, killing, fighting, incision.'
+    find_subj_prompt = prompt if find_subj_prompt is None else find_subj_prompt
+    find_obj_prompt = prompt if find_obj_prompt is None else find_obj_prompt
     return find_subj_prompt, find_obj_prompt
 
 def get_triples_from_gpt_3(work_path, gpt3_answers_file_path, questions_path, num_of_concepts_returned, prompt_function, engines=['curie'], temperatures=[0, 0.6, 1], specific_predicates=False, predicates=[], is_fuzzy=False, is_predicate_expansion=False, const_fuzzy_prompt=False):
@@ -157,16 +153,11 @@ def get_triples_from_gpt_3(work_path, gpt3_answers_file_path, questions_path, nu
         # Adjusting temperature for Fuzzy
         # TODO: Update to get from input without overwriting
         if is_fuzzy or is_predicate_expansion:
-            if row.weight == 'high':
-                temperatures = [0, 0.7, 1]
-            else:
-                temperatures = [0.7, 1]
+            temperatures = [0, 0.7, 1] if row.weight == 'high' else [0.7, 1]
         # Find subject question
         find_subj_question = questions_df.iloc[index].find_subj_question
         gpt3_answers_df.iloc[index].find_subj_question = find_subj_question
-        # Making sure the verbalized question exists
         if type(find_subj_question) == str and find_subj_question != '':
-            # Only processing response if we have no answers
             if len(literal_eval(row.find_subj_answers)) == 0 or literal_eval(row.find_subj_answers)[0] == '':
                 print(f'\n Processing: [SUBJ] --> {row.predicate} --> {row.object} \n')
                 for engine in engines:
@@ -193,9 +184,7 @@ def get_triples_from_gpt_3(work_path, gpt3_answers_file_path, questions_path, nu
         # Find object question
         find_obj_question = questions_df.iloc[index].find_obj_question
         gpt3_answers_df.iloc[index].find_obj_question = find_obj_question
-        # Making sure the verbalized question exists
         if type(find_obj_question) == str and find_obj_question != '':
-            # Only processing response if we have no answers
             if len(literal_eval(row.find_obj_answers)) == 0 or literal_eval(row.find_obj_answers)[0] == '':
                 print(f'\n Processing: {row.subject} --> {row.predicate} --> [OBJ] \n')
                 for engine in engines:
@@ -217,7 +206,7 @@ def get_triples_from_gpt_3(work_path, gpt3_answers_file_path, questions_path, nu
                     gpt3_answers_df.loc[index, 'find_obj_reason'] = reason.strip()
                 answered_count += 1
                 new_update = True
-        
+
         # Saving step results
         if new_update:
             gpt3_answers_df.to_csv(gpt3_answers_file_path, index=False)
@@ -239,25 +228,23 @@ if __name__ == "__main__":
     conceptnet_100k_path = './data/test.txt'
     num_of_concepts_returned = 10
     engine = 'text-davinci-002'
-    generate_questions = False
-
     # Generating verbalized questions to ask from GPT-3
     questions_out_file_name = f'questions_{num_of_concepts_returned}_returned_concepts.csv'
     questions_path = f'{work_path}/{questions_out_file_name}'
-    if generate_questions:
+    if generate_questions := False:
         conceptnet_data = load_conceptnet_100k(conceptnet_100k_path)
         questions_path = generate_questions(work_path, conceptnet_data, num_of_concepts_returned)
         questions_path = fix_bad_question_generations(work_path, num_of_concepts_returned)
     # Updating specific predicate questions if needed
     # questions_path = fix_bad_question_generations(work_path, num_of_concepts_returned, predicates=['IsA', 'AtLocation'], specific_predicates=True)
-    
+
     # Getting GPT-3 Answers
     gpt3_answers_file_path = f'{work_path}/{Path(questions_path).stem}_with_answers_using_{engine}_model.csv'.replace('-', '_')
     if not os.path.isfile(gpt3_answers_file_path):
         # Blank copy if does not exist already
         os.system(f'cp {questions_path} {gpt3_answers_file_path}')
     get_triples_from_gpt_3(gpt3_answers_file_path, questions_path, num_of_concepts_returned, generate_better_prompt, engine=engine, temperatures=[0, 0.6, 1])
-    
+
     # Calculating metrics
     results_file_name = f'questions_{num_of_concepts_returned}_returned_concepts_with_answers_using_{engine}_model.csv'.replace('-', '_')
     results_file_path = f'{work_path}/{results_file_name}'

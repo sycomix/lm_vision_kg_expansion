@@ -127,13 +127,15 @@ def find_most_common_predicates(wpkg, top_n_predicates, exclude=[]):
     pred_count = {}
     for triple, v in wpkg.items():
         subj, pred, obj = triple.split(':')
-        if pred in pred_count.keys():
+        if pred in pred_count:
             pred_count[pred] += 1
         else:
             pred_count[pred] = 1
     # Sorting
-    sorted_preds = {k: v for k, v in sorted(pred_count.items(), key=lambda item: item[1], reverse=True)}
-    sorted_preds_arr = [k for k, v in sorted_preds.items() if k not in exclude]
+    sorted_preds = dict(
+        sorted(pred_count.items(), key=lambda item: item[1], reverse=True)
+    )
+    sorted_preds_arr = [k for k in sorted_preds if k not in exclude]
     return sorted_preds_arr[:top_n_predicates]
 
 def generate_all_prompts(possible_concepts, no_of_results, top_preds=[], is_fuzzy=False, is_predicate_expansion=False, weights=['high', 'mid'], const_fuzzy_prompt=False):
@@ -164,14 +166,14 @@ def generate_fuzzy_prompt(subj, pred, obj, weight, possible_subjects, possible_o
     no_of_results = NUM_TO_STRING[n]
     # Find subject prompt
     sample_question = FUZZY_QUESTION_TEMPLATES[pred][weight][0]
-    sample_question = eval('f' + repr(sample_question))
+    sample_question = eval(f'f{repr(sample_question)}')
     sample_results = ', '.join(possible_subjects)
-    find_subj_prompt = eval('f' + repr(FUZZY_PROMPT_TEMPLATES[weight]))
+    find_subj_prompt = eval(f'f{repr(FUZZY_PROMPT_TEMPLATES[weight])}')
     # Find object prompt
     sample_question = FUZZY_QUESTION_TEMPLATES[pred][weight][1]
-    sample_question = eval('f' + repr(sample_question))
+    sample_question = eval(f'f{repr(sample_question)}')
     sample_results = ', '.join(possible_objects)
-    find_obj_prompt = eval('f' + repr(FUZZY_PROMPT_TEMPLATES[weight]))
+    find_obj_prompt = eval(f'f{repr(FUZZY_PROMPT_TEMPLATES[weight])}')
     return find_subj_prompt, find_obj_prompt
 
 def generate_prompt(subj, pred, obj, possible_subjects, possible_objects, n=5):
@@ -188,14 +190,14 @@ def generate_prompt(subj, pred, obj, possible_subjects, possible_objects, n=5):
     no_of_results = NUM_TO_STRING[n]
     # Find subject prompt
     sample_question = QUESTION_TEMPLATES[pred][0]
-    sample_question = eval('f' + repr(sample_question))
+    sample_question = eval(f'f{repr(sample_question)}')
     sample_results = ', '.join(possible_subjects)
-    find_subj_prompt = eval('f' + repr(PROMPT_TEMPLATE))
+    find_subj_prompt = eval(f'f{repr(PROMPT_TEMPLATE)}')
     # Find object prompt
     sample_question = QUESTION_TEMPLATES[pred][1]
-    sample_question = eval('f' + repr(sample_question))
+    sample_question = eval(f'f{repr(sample_question)}')
     sample_results = ', '.join(possible_objects)
-    find_obj_prompt = eval('f' + repr(PROMPT_TEMPLATE))
+    find_obj_prompt = eval(f'f{repr(PROMPT_TEMPLATE)}')
     return find_subj_prompt, find_obj_prompt
 
 def find_top_triple_for_predicates(sorted_wpkg, predicates):
@@ -264,20 +266,21 @@ def pick_random_key_from_wpkg(wpkg: dict):
         _type_: the random key
     """
     keys = list(wpkg.keys())
-    random_key = random.choice(keys)
-    return random_key
+    return random.choice(keys)
 
 def select_top_n_from_wpkg(sorted_wpkg, data_size):
     # Keeping the top_n triples with highest weights
     top_wpkg_keys = sorted(sorted_wpkg, key=sorted_wpkg.get, reverse=True)[:data_size]
-    top_wpkg = {k: sorted_wpkg[k] for k in top_wpkg_keys}
-    return top_wpkg
+    return {k: sorted_wpkg[k] for k in top_wpkg_keys}
 
 def select_top_n_from_wpkg_without_repetition(sorted_wpkg, data_size):
     # Keeping the top_n triples with highest weights
     top_wpkg_keys = sorted(sorted_wpkg, key=sorted_wpkg.get, reverse=True)[:data_size]
-    top_wpkg = {k: sorted_wpkg[k] for k in top_wpkg_keys if k.split(':')[0] != k.split(':')[2]}
-    return top_wpkg
+    return {
+        k: sorted_wpkg[k]
+        for k in top_wpkg_keys
+        if k.split(':')[0] != k.split(':')[2]
+    }
 
 def select_triples_from_wpkg_based_on_predicates(sorted_wpkg, top_preds, possible_concepts, no_of_triples_to_expand, top_wpkg_size_to_select_from=1000, exclude_concepts=[], exclude_triples=[]):
     """_summary_
@@ -314,7 +317,7 @@ def select_triples_from_wpkg_based_on_predicates(sorted_wpkg, top_preds, possibl
             selected_triples[predicate] = list(filtered_wpkg.keys())
             # Selecting the remaining randomly from the whole top WpKG
             # TODO: This part needs to be revised as sometimes it resutls in nonsense questions, such as "What is made of man?"
-            for i in range(no_of_triples_to_expand-len(selected_triples[predicate])):
+            for _ in range(no_of_triples_to_expand-len(selected_triples[predicate])):
                 random_triple = pick_random_key_from_wpkg(top_wpkg)
                 subj, pred, obj = random_triple.split(':')
                 # TODO: Add safety check if needed. As triples are most probably new, not needed.
